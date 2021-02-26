@@ -202,7 +202,7 @@ public class ChargementServiceImpl implements IChargementService {
             MimeMessage message = sender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message);
 
-            helper.setTo(new String[]{"tabord@bracongo.cd", "g.nkulu@bracongo.cd"});
+            helper.setTo(new String[]{"tabord@bracongo.cd", "g.nkulu@bracongo.cd", "h.onandjeka@bracongo.cd"});
             helper.setSubject("Rapport Chargement vs Retour vs Ventes");
             helper.setFrom("rdsid@bracongo.cd");
             MimeBodyPart messageBodyPart1 = new MimeBodyPart();
@@ -214,9 +214,7 @@ public class ChargementServiceImpl implements IChargementService {
             mpart.addBodyPart(messageBodyPart1);
             message.setContent(mpart);
             sender.send(message);
-        } catch (IOException ex) {
-            Logger.getLogger(ChargementServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (MessagingException ex) {
+        } catch (IOException | MessagingException ex) {
             Logger.getLogger(ChargementServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
         }
 

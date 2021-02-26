@@ -80,6 +80,11 @@ public class RepArticleInfoBi implements Serializable{
     public void setCodeEmballage(int codeEmballage) {
         this.codeEmballage = codeEmballage;
     }
+
+    @Override
+    public String toString() {
+        return "RepArticleInfoBi{" + "codeInfoBi=" + codeInfoBi + ", codar=" + codar + ", designation=" + designation + ", famille=" + famille + ", taille=" + taille + ", codeEmballage=" + codeEmballage + '}';
+    }
     
     
     

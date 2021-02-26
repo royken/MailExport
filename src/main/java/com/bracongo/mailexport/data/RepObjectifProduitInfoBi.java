@@ -41,6 +41,22 @@ public class RepObjectifProduitInfoBi implements Serializable{
         this.budget = budget;
     }
 
+    public int getMois(){
+        return repObjectifProduitInfoBiPK.getMois();
+    }
+    
+    public String getCodeInfoBi(){
+        return repObjectifProduitInfoBiPK.getCodeInfoBi();
+    }
+    
+    public String getCodeCd(){
+        return repObjectifProduitInfoBiPK.getCodeCd();
+    }
+    
+    public int getAnne(){
+        return repObjectifProduitInfoBiPK.getAnnee();
+    }
+    
     public void setRepObjectifProduitInfoBiPK(RepObjectifProduitInfoBiPK repObjectifProduitInfoBiPK) {
         this.repObjectifProduitInfoBiPK = repObjectifProduitInfoBiPK;
     }

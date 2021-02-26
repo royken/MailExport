@@ -236,7 +236,7 @@ public class VenteRateeServiceImpl implements IVenteRateeService {
             MimeMessageHelper helper = new MimeMessageHelper(message);
 
             //helper.setTo("ddis@bracongo.cd");
-            helper.setTo(new String[]{"ddis@bracongo.cd", "g.nkulu@bracongo.cd"});
+            helper.setTo(new String[]{"ddis@bracongo.cd", "g.nkulu@bracongo.cd", "h.onandjeka@bracongo.cd"});
             helper.setSubject("Rapport Ventes ratées et Erreurs cumulées du mois");
             helper.setFrom("rdsid@bracongo.cd");
             MimeBodyPart messageBodyPart1 = new MimeBodyPart();

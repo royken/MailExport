@@ -4,6 +4,7 @@ import com.bracongo.mailexport.data.RepVenteRatee;
 import com.bracongo.mailexport.data.dto.ProduitHectoRateeDto;
 import com.bracongo.mailexport.data.dto.VenteRateeCdDto;
 import com.bracongo.mailexport.service.IRapportFactureService;
+import com.bracongo.mailexport.service.IRapportInfoBiService;
 import com.bracongo.mailexport.service.IVenteRateeService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,9 @@ public class VenteRateeCtrl {
     @Autowired
     private IRapportFactureService factureService;
     
+    @Autowired
+    private IRapportInfoBiService infoBiService;
+    
     @RequestMapping(method = RequestMethod.GET)
     @CrossOrigin(origins = "*")
     public ResponseEntity<List<RepVenteRatee>> getAllVentesRatees(){
@@ -57,6 +61,12 @@ public class VenteRateeCtrl {
     @CrossOrigin(origins = "*")
     public void testMail(){
          factureService.produceHeureVenteRapportAndMail();
+    }
+    
+    @RequestMapping(method = RequestMethod.GET, value = "mail2")
+    @CrossOrigin(origins = "*")
+    public void testMail2(){
+         infoBiService.produceRapportDataAndMail();
     }
     
 }

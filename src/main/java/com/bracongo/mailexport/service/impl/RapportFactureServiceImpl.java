@@ -182,7 +182,7 @@ public class RapportFactureServiceImpl implements IRapportFactureService {
             MimeMessage message = sender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message);
 
-            helper.setTo(new String[]{"ddis@bracongo.cd", "g.nkulu@bracongo.cd"});
+            helper.setTo(new String[]{"ddis@bracongo.cd", "g.nkulu@bracongo.cd", "h.onandjeka@bracongo.cd"});
             helper.setSubject("Rapport heures de vente premier client");
             helper.setFrom("rdsid@bracongo.cd");
             MimeBodyPart messageBodyPart1 = new MimeBodyPart();
