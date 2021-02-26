@@ -519,7 +519,7 @@ public class RapportInfoBiServiceImpl implements IRapportInfoBiService {
 
             colId++;
         }
-        rowId++;
+        rowId = 13;
 
         // filling data
         String[] familles = new String[]{"BI", "BG", "XXL", "EAUX"};
@@ -530,6 +530,18 @@ public class RapportInfoBiServiceImpl implements IRapportInfoBiService {
             List<BudgetInfoBiByCDMoisFamilleDto> budgetFamilles_ = getBudgetByFamille(budgetFamilles, famille);
             // VENTES PAR FAMILLE ventesGlobalByMoisCdFamilleNMUn
             List<VenteGratuitFamilleCDData> ventesGlobalByMoisCdFamilleNMUn_ = getListVenteByFamille(ventesGlobalByMoisCdFamilleNMUn, famille);
+            row = budgetSheet.createRow(rowId);
+            cell = row.createCell(1);
+            cell.setCellValue(getFamilleNameFromFamilleCode(famille));           
+            budgetSheet.addMergedRegion(new CellRangeAddress(
+                    rowId, //first row (0-based)
+                    rowId, //last row  (0-based)
+                    1, //first column (0-based)
+                    4 //last column  (0-based)
+            ));
+            cell.setCellStyle(tableHeader);
+            rowId++;
+            colId =0;
             for (RepArticleInfoBi article : familleArticles) {
                 row = budgetSheet.createRow(rowId);
                 cell = row.createCell(colId++);
@@ -698,33 +710,36 @@ public class RapportInfoBiServiceImpl implements IRapportInfoBiService {
 
             totalBudgetCell = totalRow.createCell(colId);
             totalBudgetCell.setCellValue("TOTAL " + getFamilleNameFromFamilleCode(famille) + " GROUPE");
-            totalBudgetCell.setCellStyle(totalFamilleLabel);
+            
             budgetSheet.addMergedRegion(new CellRangeAddress(
                     rowId, //first row (0-based)
                     rowId, //last row  (0-based)
                     colId, //first column (0-based)
                     4 //last column  (0-based)
             ));
+            totalBudgetCell.setCellStyle(totalFamilleLabel);
 
             totalVenteCell = venteRow.createCell(colId);
             totalVenteCell.setCellValue("2020");
-            totalVenteCell.setCellStyle(totalVenteStyle);
+            
             budgetSheet.addMergedRegion(new CellRangeAddress(
                     rowId + 1, //first row (0-based)
                     rowId + 1, //last row  (0-based)
                     colId, //first column (0-based)
                     4 //last column  (0-based)
             ));
+            totalVenteCell.setCellStyle(totalVenteStyle);
 
             variationCell = varaiationRow.createCell(colId);
             variationCell.setCellValue("Variation");
-            variationCell.setCellStyle(variationStyle);
+            
             budgetSheet.addMergedRegion(new CellRangeAddress(
                     rowId + 2, //first row (0-based)
                     rowId + 2, //last row  (0-based)
                     colId, //first column (0-based)
                     4 //last column  (0-based)
             ));
+            variationCell.setCellStyle(variationStyle);
 
             double totalBudgetMois = 0;
             double totalVenteMois = 0;
