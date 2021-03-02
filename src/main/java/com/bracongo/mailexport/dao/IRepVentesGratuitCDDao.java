@@ -2,6 +2,7 @@ package com.bracongo.mailexport.dao;
 
 import com.bracongo.mailexport.data.RepVenteJourCDCircuitGratuitCA;
 import com.bracongo.mailexport.data.dto.VenteEtGratuitGammeCdMoisAnneeDto;
+import com.bracongo.mailexport.data.dto.VenteEtGratuitInfoBiFamilleCDMois;
 import com.bracongo.mailexport.data.dto.VenteGratuitGlobalByMoisAnnee;
 import com.bracongo.mailexport.data.dto.VenteGratuitProduitAnneeDto;
 import com.bracongo.mailexport.data.dto.VenteGratuitProduitAnneeMoisDto;
@@ -61,4 +62,18 @@ public interface IRepVentesGratuitCDDao extends JpaRepository<RepVenteJourCDCirc
             + " and ventes.codars = article.artCodars"
             + " group by  ventes.mois, ventes.codeCD, article.artGamme")
     public List<VenteEtGratuitGammeCdMoisAnneeDto> getVentesByCDGammeAnneeMoisBy(@Param("annee") int annee);
+    
+    @Query("select new com.bracongo.mailexport.data.dto.VenteEtGratuitInfoBiFamilleCDMois("
+            + " ventes.codeCD, "           
+            + " ventes.mois, "
+            + " ventes.annee, "
+            + " article.codar, "
+            + " article.famille, "
+            + " article.codeInfoBi, "
+            + " sum(ventes.hecto) ) "          
+            + " from RepVenteJourCDCircuitGratuitCA ventes, RepArticleInfoBi article "
+            + " where ventes.annee = :annee "
+            + " and ventes.codars = article.codar"
+            + " group by  ventes.mois, ventes.codeCD, article.codar, article.famille, article.codeInfoBi, ventes.annee")
+    public List<VenteEtGratuitInfoBiFamilleCDMois> getVenteGratuitFamilleMoisProduit(@Param("annee") int annee);
 }
