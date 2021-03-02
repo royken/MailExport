@@ -76,7 +76,7 @@ public class VenteGratuitFamilleCDData {
             return "VIN";
         }
         
-        return "BI";
+        return "BG";
     }
     
     

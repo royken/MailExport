@@ -132,6 +132,9 @@ public class RapportInfoBiServiceImpl implements IRapportInfoBiService {
 
     XSSFCellStyle simpleStyle;
 
+    XSSFFont greenFont;
+    XSSFFont redFont;
+
     @Override
     public void produceRapportDataAndMail() {
 
@@ -183,10 +186,10 @@ public class RapportInfoBiServiceImpl implements IRapportInfoBiService {
             cdNameFont.setItalic(false);
 
             XSSFFont totalLabelFont = workbook.createFont();
-            cdNameFont.setFontHeightInPoints((short) 10);
-            cdNameFont.setFontName("Arial");
-            cdNameFont.setColor(IndexedColors.DARK_RED.getIndex());
-            cdNameFont.setBold(true);
+            totalLabelFont.setFontHeightInPoints((short) 10);
+            totalLabelFont.setFontName("Arial");
+            totalLabelFont.setColor(IndexedColors.DARK_RED.getIndex());
+            totalLabelFont.setBold(true);
 
             XSSFFont lastYearFont = workbook.createFont();
             lastYearFont.setFontHeightInPoints((short) 10);
@@ -197,8 +200,18 @@ public class RapportInfoBiServiceImpl implements IRapportInfoBiService {
             XSSFFont variationFont = workbook.createFont();
             variationFont.setFontHeightInPoints((short) 10);
             variationFont.setFontName("Arial");
-            font.setColor(IndexedColors.BLACK.getIndex());
+            variationFont.setColor(IndexedColors.BLACK.getIndex());
             variationFont.setBold(true);
+
+            XSSFFont greenFont = workbook.createFont();
+            greenFont.setFontHeightInPoints((short) 10);
+            greenFont.setFontName("Arial");
+            greenFont.setColor(IndexedColors.GREEN.getIndex());
+            
+            XSSFFont redFont = workbook.createFont();
+            greenFont.setFontHeightInPoints((short) 10);
+            greenFont.setFontName("Arial");
+            greenFont.setColor(IndexedColors.RED.getIndex());
 
             myStyle = workbook.createCellStyle();
             myStyle.setRotation((short) 90);
@@ -271,10 +284,11 @@ public class RapportInfoBiServiceImpl implements IRapportInfoBiService {
 
             topThickBorder = workbook.createCellStyle();
             topThickBorder.setTopBorderColor(blackBorderColor);
-            topThickBorder.setBorderTop(BorderStyle.THIN);
+            topThickBorder.setBorderTop(BorderStyle.THICK);
+            
             bottomThickBorder = workbook.createCellStyle();
             bottomThickBorder.setBottomBorderColor(blackBorderColor);
-            bottomThickBorder.setBorderBottom(BorderStyle.THIN);
+            bottomThickBorder.setBorderBottom(BorderStyle.THICK);
 
             cdName = workbook.createCellStyle();
             cdName.setAlignment(HorizontalAlignment.CENTER);
@@ -378,7 +392,7 @@ public class RapportInfoBiServiceImpl implements IRapportInfoBiService {
             XSSFSheet recapSheet = workbook.createSheet("RECAP");
             XSSFSheet budgetSheet = workbook.createSheet("BUDGET");
             XSSFSheet ventesSheet = workbook.createSheet("Ventes + Gratuits");
-            produceRecapSheet(recapSheet, budgetFamilles, ventesFamilleProduitMCDMois, cds, ventesGlobalByMoisCdFamille);
+            produceRecapSheet(recapSheet, budgetFamilles, cds, ventesGlobalByMoisCdFamille);
             produceBudgetSheet(budgetSheet, articles, cds, ventesProduitNMUn, ventesGlobalNMUn, budgetsMoisProduit, budgetGlobalProduitsByCD, budgetGlobalMois, budgetFamilles, ventesGlobalByMoisCdFamilleNMUn);
             produceVentesSheet(ventesSheet, articles, cds, ventesProduit, ventesGlobal, budgetsMoisProduit, budgetGlobalProduitsByCD, budgetGlobalMois, budgetFamilles, ventesFamilleProduitMCDMois);
             File file = File.createTempFile("Rapport", "xlsx");
@@ -416,8 +430,11 @@ public class RapportInfoBiServiceImpl implements IRapportInfoBiService {
 
     }
 
-    private void produceRecapSheet(XSSFSheet recapSheet, List<BudgetInfoBiByCDMoisFamilleDto> budgetFamilles, List<VenteEtGratuitInfoBiFamilleCDMois> ventesFamilleProduitMCDMois, List<TbCentreDistribution> cds, List<VenteGratuitFamilleCDData> ventesGlobalByMoisCdFamille) {
+    private void produceRecapSheet(XSSFSheet recapSheet, List<BudgetInfoBiByCDMoisFamilleDto> budgetFamilles, List<TbCentreDistribution> cds, List<VenteGratuitFamilleCDData> ventesGlobalByMoisCdFamille) {
         Calendar cal = Calendar.getInstance();
+        int year = cal.get(Calendar.YEAR);
+        int lastYear = year - 1;
+        int mois = cal.get(cal.get(Calendar.MONTH)) + 1;
         int rowId = 3;
         int colId = 0;
         Row row = recapSheet.createRow(rowId);
@@ -440,22 +457,24 @@ public class RapportInfoBiServiceImpl implements IRapportInfoBiService {
             cell.setCellStyle(tableHeader);
         }
         rowId++;
+        colId = 0;
         // filling data
 
         //Mois Data
         String[] familles = new String[]{"BI", "BG", "XXL", "EAUX"};
+        int counter = 1; // to check first and last element : cellStyle
         for (String famille : familles) {
-            int counter = 1;
             //Budget Par Famille
             List<BudgetInfoBiByCDMoisFamilleDto> budgetFamilles_ = getBudgetByFamille(budgetFamilles, famille);
             // VENTES PAR FAMILLE ventesGlobalByMoisCdFamilleNMUn
             List<VenteGratuitFamilleCDData> ventesGlobalByMoisCdFamilleNMUn_ = getListVenteByFamille(ventesGlobalByMoisCdFamille, famille);
 
             row = recapSheet.createRow(rowId);
-            venteRow = recapSheet.createRow(rowId);
+           // venteRow = recapSheet.createRow(rowId);
             budgetRow = recapSheet.createRow(rowId + 1);
             variationRow = recapSheet.createRow(rowId + 2);
-            cell = row.createCell(colId++);
+            cell = row.createCell(colId);
+
             cell.setCellValue(getFamilleNameFromFamilleCode(famille));
             recapSheet.addMergedRegion(new CellRangeAddress(
                     rowId, //first row (0-based)
@@ -464,13 +483,210 @@ public class RapportInfoBiServiceImpl implements IRapportInfoBiService {
                     colId //last column  (0-based)
             ));
             cell.setCellStyle(tableHeader);
+            colId++;
+            
+            venteCell = row.createCell(colId);
+            budgetCell = budgetRow.createCell(colId);
+            variationCell = variationRow.createCell(colId);
+            venteCell.setCellValue(year + " RL");
+            venteCell.setCellStyle(leftRightTopThickBorder);
+            budgetCell.setCellValue(year + " BU");
+            budgetCell.setCellStyle(leftRightThickBorder);
+            variationCell.setCellValue("Variation");
+            variationCell.setCellStyle(leftRightBottomThickBorder);
+            colId++;
+            double variation = 0;
+            double budgetMoisCd = 0;
+            double venteMoisCd = 0;
+
+            for (TbCentreDistribution cd : cds) {
+                venteMoisCd = getTotalVenteByMonthByCd(ventesGlobalByMoisCdFamilleNMUn_, mois, cd.getCdiCodecd());
+                budgetMoisCd = getTotalBudgetByMonthByCd(budgetFamilles_, mois, cd.getCdiCodecd());
+                variation = (budgetMoisCd == 0) ? 100 : Math.round(((venteMoisCd / budgetMoisCd) - 1) * 100);
+                venteCell = row.createCell(colId);
+                budgetCell = budgetRow.createCell(colId);
+                variationCell = variationRow.createCell(colId);
+                venteCell.setCellValue(venteMoisCd);
+                if (counter == 1) {
+                    venteCell.setCellStyle(leftTopThickBorder);
+                }
+                else if (counter == cds.size()) {
+                    venteCell.setCellStyle(rightTopThickBorder);
+                } else {
+                    venteCell.setCellStyle(topThickBorder);
+                }
+
+                budgetCell.setCellValue(budgetMoisCd);
+                if (counter == 1) {
+                    budgetCell.setCellStyle(leftThickBorder);
+                }
+                
+                else if (counter == cds.size()) {
+                    budgetCell.setCellStyle(rightThickBorder);
+                }
+
+                variationCell.setCellValue(variation + "%");
+                if (counter == 1) {
+                    variationCell.setCellStyle(leftBottomThickBorder);
+                }
+                else if (counter == cds.size()) {
+                    variationCell.setCellStyle(rightBottomThickBorder);
+                } else {
+                    variationCell.setCellStyle(bottomThickBorder);
+                }
+                colId++;
+                counter++;
+            }
+            rowId += 3;
+            colId = 0;
+            counter = 1;
         }
 
+        rowId += 2;
+        colId = 0;
+
         // Annee Data
+        row = recapSheet.createRow(rowId);
+        cell = row.createCell(colId++);
+        cell.setCellValue("ANNUEL");
+        cell.setCellStyle(tableHeader);
+        cell = row.createCell(colId++);
+        cell.setCellValue("VOLUMES");
+        cell.setCellStyle(tableHeader);
+        for (TbCentreDistribution cd : cds) {
+            cell = row.createCell(colId++);
+            cell.setCellValue(cd.getCdiNomcdi().trim());
+            cell.setCellStyle(tableHeader);
+        }
+        rowId++;
+        counter = 1; // to check first and last element : cellStyle
+        colId = 0;
+        for (String famille : familles) {
+            //Budget Par Famille
+            List<BudgetInfoBiByCDMoisFamilleDto> budgetFamilles_ = getBudgetByFamille(budgetFamilles, famille);
+            // VENTES PAR FAMILLE ventesGlobalByMoisCdFamilleNMUn
+            List<VenteGratuitFamilleCDData> ventesGlobalByMoisCdFamilleNMUn_ = getListVenteByFamille(ventesGlobalByMoisCdFamille, famille);
+
+            row = recapSheet.createRow(rowId);
+            //venteRow = recapSheet.createRow(rowId);
+            budgetRow = recapSheet.createRow(rowId + 1);
+            variationRow = recapSheet.createRow(rowId + 2);
+            cell = row.createCell(colId);
+
+            cell.setCellValue(getFamilleNameFromFamilleCode(famille));
+            recapSheet.addMergedRegion(new CellRangeAddress(
+                    rowId, //first row (0-based)
+                    rowId + 2, //last row  (0-based)
+                    colId, //first column (0-based)
+                    colId //last column  (0-based)
+            ));
+            cell.setCellStyle(tableHeader);
+            colId ++;
+            venteCell = row.createCell(colId);
+            budgetCell = budgetRow.createCell(colId);
+            variationCell = variationRow.createCell(colId);
+            venteCell.setCellValue( year + " RL");
+            venteCell.setCellStyle(leftRightTopThickBorder);
+            budgetCell.setCellValue( year + " BU");
+            budgetCell.setCellStyle(leftRightThickBorder);
+            variationCell.setCellValue("Variation");
+            variationCell.setCellStyle(leftRightBottomThickBorder);
+            colId++;
+            double variation = 0;
+            double totalBudgetCd = 0;
+            double totalVenteCd = 0;
+
+            for (TbCentreDistribution cd : cds) {
+                totalVenteCd = getTotalVenteFamilleCd(ventesGlobalByMoisCdFamilleNMUn_, cd.getCdiCodecd());
+                totalBudgetCd = getTotalBudgetFamilleByCd(budgetFamilles_, cd.getCdiCodecd());
+                variation = (totalBudgetCd == 0) ? 100 : Math.round(((totalVenteCd / totalBudgetCd) - 1) * 100);
+                venteCell = row.createCell(colId);
+                budgetCell = budgetRow.createCell(colId);
+                variationCell = variationRow.createCell(colId);
+                venteCell.setCellValue(totalVenteCd);
+                if (counter == 1) {
+                    venteCell.setCellStyle(leftTopThickBorder);
+                }
+                if (counter == cds.size()) {
+                    venteCell.setCellStyle(rightTopThickBorder);
+                } else {
+                    venteCell.setCellStyle(topThickBorder);
+                }
+
+                budgetCell.setCellValue(totalBudgetCd);
+                if (counter == 1) {
+                    budgetCell.setCellStyle(leftThickBorder);
+                }
+                if (counter == cds.size()) {
+                    budgetCell.setCellStyle(rightThickBorder);
+                }
+
+                variationCell.setCellValue(variation + "%");
+                if (counter == 1) {
+                    variationCell.setCellStyle(leftBottomThickBorder);
+                }
+                if (counter == cds.size()) {
+                    variationCell.setCellStyle(rightBottomThickBorder);
+                } else {
+                    variationCell.setCellStyle(bottomThickBorder);
+                }
+                colId++;
+                counter++;
+            }
+            rowId += 3;
+            colId = 0;
+            counter = 1;
+        }
+
+        // Global data
+        rowId += 2;
+        colId = 1;
+        row = recapSheet.createRow(rowId++);
+        cell = row.createCell(colId++);
+        cell.setCellValue("% ACTUEL");
+        cell.setCellStyle(rightBottomThickBorder);
+        for (TbCentreDistribution cd : cds) {
+            cell = row.createCell(colId++);
+            cell.setCellValue(cd.getCdiNomcdi().trim());
+            cell.setCellStyle(tableHeader);
+        }
+        colId = 1;
+        counter = 1; // to check first and last element : cellStyle
+        int counter2 = 1; // to check first and last familly element for cellStyle
+        for (String famille : familles) {
+            List<VenteGratuitFamilleCDData> ventesGlobalByMoisCdFamilleNMUn_ = getListVenteByFamille(ventesGlobalByMoisCdFamille, famille);
+            counter = 1;
+            row = recapSheet.createRow(rowId++);
+            cell = row.createCell(colId++);
+            cell.setCellValue(getFamilleNameFromFamilleCode(famille));
+            if (counter2 == 1) {
+                cell.setCellStyle(leftRightTopThickBorder);
+            }
+            if (counter2 == familles.length) {
+                cell.setCellStyle(leftRightBottomThickBorder);
+            } else {
+                cell.setCellStyle(leftRightThickBorder);
+            }
+            double totalVenteFamille = getTotalVenteFamille(ventesGlobalByMoisCdFamilleNMUn_);
+            double pourcentage = 0;
+            for (TbCentreDistribution cd : cds) {
+                cell = row.createCell(colId++);
+                double totalVenteCd = getTotalVenteFamilleCd(ventesGlobalByMoisCdFamilleNMUn_, cd.getCdiCodecd());
+                pourcentage = (totalVenteFamille == 0) ? 0 : Math.round((totalVenteCd / totalVenteFamille) * 100);
+                cell.setCellValue(pourcentage + "%");
+                //cell.setCellStyle(tableHeader);
+                counter++;
+            }
+            colId = 1;
+            counter2++;
+        }
+        
     }
 
     private void produceBudgetSheet(XSSFSheet budgetSheet, List<RepArticleInfoBi> articles, List<TbCentreDistribution> cds, List<VenteGratuitProduitAnneeDto> ventesProduitNMUn, List<VenteGratuitGlobalByMoisAnnee> ventesGlobalNMUn, List<BudgetInfoBiByMoisAnneeDto> budgetsMoisProduit, List<BudgetGlobalProduitByCd> budgetGlobalProduitsByCD, List<BudgetInfoBiGlobalMoisAnneeDto> budgetGlobalMois, List<BudgetInfoBiByCDMoisFamilleDto> budgetFamilles, List<VenteGratuitFamilleCDData> ventesGlobalByMoisCdFamilleNMUn) {
         Calendar cal = Calendar.getInstance();
+        int year = cal.get(Calendar.YEAR);
+        int lastYear = year - 1;
         int rowId = 11;
         int colId = 0;
         Row row = budgetSheet.createRow(rowId);
@@ -789,7 +1005,7 @@ public class RapportInfoBiServiceImpl implements IRapportInfoBiService {
             totalBudgetCell.setCellStyle(totalFamilleLabel);
 
             totalVenteCell = venteRow.createCell(colId);
-            totalVenteCell.setCellValue("2020");
+            totalVenteCell.setCellValue(lastYear);
 
             budgetSheet.addMergedRegion(new CellRangeAddress(
                     rowId + 1, //first row (0-based)
@@ -818,7 +1034,7 @@ public class RapportInfoBiServiceImpl implements IRapportInfoBiService {
                 totalVenteCell = venteRow.createCell(colId);
                 variationCell = varaiationRow.createCell(colId);
                 double budgetFamilleMois = getTotalBudgetByMonth(budgetFamilles_, i);
-                double ventFamilleMois = getTotalVenteByMonth(ventesGlobalByMoisCdFamilleNMUn, i);
+                double ventFamilleMois = getTotalVenteByMonth(ventesGlobalByMoisCdFamilleNMUn_, i);
                 totalBudgetMois += budgetFamilleMois;
                 totalVenteMois += ventFamilleMois;
 
@@ -855,7 +1071,7 @@ public class RapportInfoBiServiceImpl implements IRapportInfoBiService {
                     totalBudgetCell = totalRow.createCell(colId);
                     totalVenteCell = venteRow.createCell(colId);
                     variationCell = varaiationRow.createCell(colId);
-                    double budgetFamilleCdMois = getTotalBudgetByMonthByCd(budgetFamilles, i, cd.getCdiCodecd());
+                    double budgetFamilleCdMois = getTotalBudgetByMonthByCd(budgetFamilles_, i, cd.getCdiCodecd());
                     double venteFamilleCdMois = getTotalVenteByMonthByCd(ventesGlobalByMoisCdFamilleNMUn_, i, cd.getCdiCodecd());
                     totalBudgetCell.setCellValue(budgetFamilleCdMois);
                     totalBudgetCell.setCellStyle(totalFamilleLabel);
@@ -894,6 +1110,8 @@ public class RapportInfoBiServiceImpl implements IRapportInfoBiService {
 
     private void produceVentesSheet(XSSFSheet ventesSheet, List<RepArticleInfoBi> articles, List<TbCentreDistribution> cds, List<VenteGratuitProduitAnneeDto> ventesProduit, List<VenteGratuitGlobalByMoisAnnee> ventesGlobal, List<BudgetInfoBiByMoisAnneeDto> budgetsMoisProduit, List<BudgetGlobalProduitByCd> budgetGlobalProduitsByCD, List<BudgetInfoBiGlobalMoisAnneeDto> budgetGlobalMois, List<BudgetInfoBiByCDMoisFamilleDto> budgetFamilles, List<VenteEtGratuitInfoBiFamilleCDMois> ventesGlobalByMoisCdFamille) {
         Calendar cal = Calendar.getInstance();
+        int year = cal.get(Calendar.YEAR);
+        int lastYear = year - 1;
         int rowId = 11;
         int colId = 0;
         Row row = ventesSheet.createRow(rowId);
@@ -1214,7 +1432,7 @@ public class RapportInfoBiServiceImpl implements IRapportInfoBiService {
             totalVenteCell.setCellStyle(totalFamilleLabel);
 
             totalBudgetCell = budgetRow.createCell(colId);
-            totalBudgetCell.setCellValue("BUDGET 2021");
+            totalBudgetCell.setCellValue("BUDGET " + year);
 
             ventesSheet.addMergedRegion(new CellRangeAddress(
                     rowId + 1, //first row (0-based)
@@ -1280,7 +1498,7 @@ public class RapportInfoBiServiceImpl implements IRapportInfoBiService {
                     totalVenteCell = totalRow.createCell(colId);
                     totalBudgetCell = budgetRow.createCell(colId);
                     variationCell = varaiationRow.createCell(colId);
-                    double budgetFamilleCdMois = getTotalBudgetByMonthByCd(budgetFamilles, i, cd.getCdiCodecd());
+                    double budgetFamilleCdMois = getTotalBudgetByMonthByCd(budgetFamilles_, i, cd.getCdiCodecd());
                     double venteFamilleCdMois = getTotalVenteByProduitByMonthByCd(ventesGlobalByMoisCdFamille_, i, cd.getCdiCodecd());
                     totalBudgetCell.setCellValue(budgetFamilleCdMois);
                     totalBudgetCell.setCellStyle(totalVenteStyle);
@@ -1522,5 +1740,33 @@ public class RapportInfoBiServiceImpl implements IRapportInfoBiService {
             default:
                 return "BIERE";
         }
+    }
+
+    private double getTotalVenteFamille(List<VenteGratuitFamilleCDData> ventesGlobalByMoisCdFamilleNMUn_) {
+        double result = 0;
+        for (VenteGratuitFamilleCDData venteGratuitFamilleCDData : ventesGlobalByMoisCdFamilleNMUn_) {
+            result += venteGratuitFamilleCDData.getHecto();
+        }
+        return result;
+    }
+
+    private double getTotalVenteFamilleCd(List<VenteGratuitFamilleCDData> ventesGlobalByMoisCdFamilleNMUn_, String cdiCodecd) {
+        double result = 0;
+        for (VenteGratuitFamilleCDData venteGratuitFamilleCDData : ventesGlobalByMoisCdFamilleNMUn_) {
+            if (String.valueOf(venteGratuitFamilleCDData.getCd()).equalsIgnoreCase(cdiCodecd)) {
+                result += venteGratuitFamilleCDData.getHecto();
+            }
+        }
+        return result;
+    }
+
+    private double getTotalBudgetFamilleByCd(List<BudgetInfoBiByCDMoisFamilleDto> budgetFamilles_, String cdiCodecd) {
+        double result = 0;
+        for (BudgetInfoBiByCDMoisFamilleDto budgetInfoBiByCDMoisFamilleDto : budgetFamilles_) {
+            if (budgetInfoBiByCDMoisFamilleDto.getCodeCd().equalsIgnoreCase(cdiCodecd)) {
+                result += budgetInfoBiByCDMoisFamilleDto.getBudget();
+            }
+        }
+        return result;
     }
 }
