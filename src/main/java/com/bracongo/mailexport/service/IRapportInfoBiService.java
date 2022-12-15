@@ -10,4 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 public interface IRapportInfoBiService {
     
     public void produceRapportDataAndMail();
+    
+    public void produceAndExportArticleTarifTaxe();
 }

@@ -7,6 +7,10 @@
     <class>com.bracongo.mailexport.data.HhtFacture</class>
     <class>com.bracongo.mailexport.data.RepChargementSrd</class>
     <class>com.bracongo.mailexport.data.TbArticle</class>
+    <class>com.bracongo.mailexport.data.RepArticleCorrespondanceInfoBi</class>
+    <class>com.bracongo.mailexport.data.RepTarifArticles</class>
+    <class>com.bracongo.mailexport.data.TbCentreDistribution</class>
+    <class>com.bracongo.mailexport.data.RepStockCdJour</class>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:sqlserver://10.112.2.38:1433;databaseName=HHT_BRACONGO"/>
       <property name="javax.persistence.jdbc.user" value="sa"/>

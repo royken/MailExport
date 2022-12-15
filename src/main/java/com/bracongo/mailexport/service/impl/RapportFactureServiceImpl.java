@@ -97,6 +97,12 @@ public class RapportFactureServiceImpl implements IRapportFactureService {
     @Override
     public void produceHeureVenteRapportAndMail() {
         try {
+            Calendar cal_ = Calendar.getInstance();
+            if (cal_.get(Calendar.DAY_OF_MONTH) == 1) {
+                cal_.add(Calendar.MONTH, -1);
+            }
+            int annee = cal_.get(Calendar.YEAR);
+            int mois = (cal_.get(Calendar.MONTH) + 1);
             Calendar cal = Calendar.getInstance();
             Calendar cal2 = Calendar.getInstance();
 
@@ -104,9 +110,9 @@ public class RapportFactureServiceImpl implements IRapportFactureService {
             cal2.add(Calendar.DATE, -1);
 
             List<ClientServisCircuit> clientServisCircuits = nativeQueryDao.getClientServiCircuitStat(cal2.get(Calendar.YEAR), cal2.get(Calendar.MONTH) + 1, cal2.get(Calendar.DATE), cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1);
-            System.out.println("IL Y A  " + clientServisCircuits.size() + " circuits");
-            List<HhtFactureCircuitDto> factureCircuitDtos = factureDao.getAllFacturesByCircuit(cal2.get(Calendar.YEAR), cal2.get(Calendar.MONTH) + 1, cal2.get(Calendar.DATE));
-            System.out.println("IL Y A " + factureCircuitDtos.size() + " factures");
+            //List<ClientServisCircuit> clientServisCircuitsMois = nativeQueryDao.getClientServiCircuitStatMonth(cal2.get(Calendar.YEAR), cal2.get(Calendar.MONTH) + 1, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1);
+            List<HhtFactureCircuitDto> factureCircuitDtos = factureDao.getAllFacturesByCircuitForDay(cal2.get(Calendar.YEAR), cal2.get(Calendar.MONTH) + 1, cal2.get(Calendar.DATE));
+            //List<HhtFactureCircuitDto> factureCircuitMoisDtos = factureDao.getAllFacturesByCircuitForMonth(annee, mois);
 
             XSSFWorkbook workbook = new XSSFWorkbook();
 
@@ -163,8 +169,15 @@ public class RapportFactureServiceImpl implements IRapportFactureService {
             footer.setAlignment(HorizontalAlignment.CENTER);
             footer.setFillPattern(FillPatternType.SOLID_FOREGROUND);
             footer.setFont(boldFont);
+            XSSFSheet raportResumeCdSheet = workbook.createSheet("Resume CD");
             XSSFSheet raportCircuitSheet = workbook.createSheet("Rapport Heures Ventes");
-            produceRapportSheet(raportCircuitSheet, clientServisCircuits, factureCircuitDtos);
+            XSSFSheet dataSheet = workbook.createSheet("Données J-1 Brutes");
+           // XSSFSheet monthDataSheet = workbook.createSheet("Données Cumul Mois Brutes");
+
+            List<ResumeData> resumes = produceRapportSheet(raportCircuitSheet, clientServisCircuits, factureCircuitDtos);
+            produceMonthDataSheet(dataSheet, factureCircuitDtos);
+            produceResumeSheet(raportResumeCdSheet, resumes);
+           // produceMonthDataSheet(monthDataSheet, factureCircuitMoisDtos);
             File file = File.createTempFile("Rapport", "xlsx");
             file.deleteOnExit();
             Path path = file.toPath();
@@ -182,9 +195,10 @@ public class RapportFactureServiceImpl implements IRapportFactureService {
             MimeMessage message = sender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message);
 
-            helper.setTo(new String[]{"ddis@bracongo.cd", "g.nkulu@bracongo.cd", "h.onandjeka@bracongo.cd"});
+            helper.setTo(new String[]{"anaclet.lawaba@castel-afrique.com","guelor.nkulu@castel-afrique.com","herve.kiwanga@castel-afrique.com", "jeremie.lutunu@castel-afrique.com", "bangoma.dakwa@castel-afrique.com", "pierre.sanakiaku@castel-afrique.com", "jules.bolebe@castel-afrique.com", "Mathias.BEKANGBA@castel-afrique.com", "rosine.modiri@castel-afrique.com", "jason.djemo@castel-afrique.com", "gregoire.sombolayi@castel-afrique.com", "nadege.vundu@castel-afrique.com"});
             helper.setSubject("Rapport heures de vente premier client");
-            helper.setFrom("rdsid@bracongo.cd");
+            helper.setCc("valmy.roikenfack@castel-afrique.com");
+            helper.setFrom("BRACONGO.Reportbusiness@castel-afrique.com");
             MimeBodyPart messageBodyPart1 = new MimeBodyPart();
             messageBodyPart1.setDataHandler(new DataHandler(fds));
 
@@ -199,7 +213,8 @@ public class RapportFactureServiceImpl implements IRapportFactureService {
         }
     }
 
-    private void produceRapportSheet(XSSFSheet rapportCircuitSheet, List<ClientServisCircuit> clientServisCircuits, List<HhtFactureCircuitDto> factureCircuitDtos) {
+    private List<ResumeData> produceRapportSheet(XSSFSheet rapportCircuitSheet, List<ClientServisCircuit> clientServisCircuits, List<HhtFactureCircuitDto> factureCircuitDtos) {
+        List<ResumeData> result = new ArrayList<>();
         int rowId = 0;
         int colId = 0;
         Cell cell;
@@ -251,11 +266,15 @@ public class RapportFactureServiceImpl implements IRapportFactureService {
 
         HashMap<String, String> listCd = getListCd(clientServisCircuits);
         System.out.println("J'aI " + listCd.size() + " cd");
+        ResumeData temp;
         for (Map.Entry<String, String> entry : listCd.entrySet()) {
+            temp = new ResumeData();
             String key = entry.getKey();
             String value = entry.getValue();
             int totalClientServis = getTotalClientServisCD(key, clientServisCircuits);
             int totalClientsCD = getTotalClientCD(key, clientServisCircuits);
+            temp.setTotalClient(totalClientsCD);
+            temp.setTotalClientServis(totalClientServis);
             List<HhtFactureCircuitDto> factureCds = getAllByCd(key, factureCircuitDtos);
             row = rapportCircuitSheet.createRow(rowId);
             cell = row.createCell(colId);
@@ -267,13 +286,18 @@ public class RapportFactureServiceImpl implements IRapportFactureService {
                     colId, //first column (0-based)
                     colId + 1 //last column  (0-based)
             ));
+            temp.setNomCd(key + " - " + value);
 
             colId = 2;
             cell = row.createCell(colId++);
-            cell.setCellValue(buildHourMinuteStringFromDate(factureCds.get(0).getDateFact()));
+            String heurePremierClient = buildHourMinuteStringFromDate(factureCds.get(0).getDateFact());
+            cell.setCellValue(heurePremierClient);
+            temp.setHeurePremierClient(heurePremierClient);
             cell.setCellStyle(cdHeader);
             cell = row.createCell(colId++);
-            cell.setCellValue(buildHourMinuteStringFromDate(factureCds.get(factureCds.size() - 1).getDateFact()));
+            String heureDernierClient = buildHourMinuteStringFromDate(factureCds.get(factureCds.size() - 1).getDateFact());
+            cell.setCellValue(heureDernierClient);
+            temp.setHeureDernierClient(heureDernierClient);
             cell.setCellStyle(cdHeader);
             cell = row.createCell(colId++);
             cell.setCellValue(totalClientServis);
@@ -285,6 +309,8 @@ public class RapportFactureServiceImpl implements IRapportFactureService {
             float pourcentage = (totalClientsCD == 0 ? 0 : ((totalClientServis * 1.0f) / totalClientsCD) * 100);
             cell.setCellValue(Math.round(pourcentage));
             cell.setCellStyle(cdHeader);
+            temp.setPorcentage(Math.round(pourcentage));
+            result.add(temp);
 
             Set<String> circuits = getListCircuitByCdFromFacture(key, factureCircuitDtos);
             ++rowId;
@@ -314,7 +340,7 @@ public class RapportFactureServiceImpl implements IRapportFactureService {
 
             }
         }
-
+        return result;
     }
 
     private List<HhtFactureCircuitDto> getAllByCd(String cd, List<HhtFactureCircuitDto> factures) {
@@ -407,7 +433,7 @@ public class RapportFactureServiceImpl implements IRapportFactureService {
         seconds /= factures.size();
         long hh = seconds / 60 / 60;
         long mm = (seconds / 60) % 60;
-        return String.format("%02d", hh)+ ":" + String.format("%02d", mm);
+        return String.format("%02d", hh) + ":" + String.format("%02d", mm);
     }
 
     private Date getAverageDateFromListFacture(List<HhtFactureCircuitDto> factures) {
@@ -443,7 +469,7 @@ public class RapportFactureServiceImpl implements IRapportFactureService {
         cal2.add(Calendar.DATE, -1);
 
         List<ClientServisCircuit> clientServisCircuits = nativeQueryDao.getClientServiCircuitStat(cal2.get(Calendar.YEAR), cal2.get(Calendar.MONTH) + 1, cal2.get(Calendar.DATE), cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1);
-        List<HhtFactureCircuitDto> factureCircuitDtos = factureDao.getAllFacturesByCircuit(cal2.get(Calendar.YEAR), cal2.get(Calendar.MONTH) + 1, cal2.get(Calendar.DATE));
+        List<HhtFactureCircuitDto> factureCircuitDtos = factureDao.getAllFacturesByCircuitForDay(cal2.get(Calendar.YEAR), cal2.get(Calendar.MONTH) + 1, cal2.get(Calendar.DATE));
         HashMap<String, String> listCd = getListCd(clientServisCircuits);
         for (Map.Entry<String, String> entry : listCd.entrySet()) {
             String key = entry.getKey();
@@ -459,9 +485,9 @@ public class RapportFactureServiceImpl implements IRapportFactureService {
             temp.setTotalClientServis(totalClientServis);
             float pourcentage = (totalClientsCD == 0 ? 0 : ((totalClientServis * 1.0f) / totalClientsCD) * 100);
             temp.setPourcentageServis(Math.round(pourcentage));
-                     
+
             List<HhtFactureCircuitDto> factureCircuit = getFirstClientOfCircuit(key, factureCds);
-             temp.setHeureMoyenne(getAverageHourString(factureCircuit));
+            temp.setHeureMoyenne(getAverageHourString(factureCircuit));
 
             result.add(temp);
 
@@ -491,9 +517,9 @@ public class RapportFactureServiceImpl implements IRapportFactureService {
             cal2.add(Calendar.DATE, -1);
 
             List<ClientServisCircuit> clientServisCircuits = nativeQueryDao.getClientServiCircuitStat(cal2.get(Calendar.YEAR), cal2.get(Calendar.MONTH) + 1, cal2.get(Calendar.DATE), cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1);
-            System.out.println("IL Y A  " + clientServisCircuits.size() + " circuits");
-            List<HhtFactureCircuitDto> factureCircuitDtos = factureDao.getAllFacturesByCircuit(cal2.get(Calendar.YEAR), cal2.get(Calendar.MONTH) + 1, cal2.get(Calendar.DATE));
-            System.out.println("IL Y A " + factureCircuitDtos.size() + " factures");
+          //  System.out.println("IL Y A  " + clientServisCircuits.size() + " circuits");
+            List<HhtFactureCircuitDto> factureCircuitDtos = factureDao.getAllFacturesByCircuitForDay(cal2.get(Calendar.YEAR), cal2.get(Calendar.MONTH) + 1, cal2.get(Calendar.DATE));
+           // System.out.println("IL Y A " + factureCircuitDtos.size() + " factures");
 
             XSSFWorkbook workbook = new XSSFWorkbook();
 
@@ -567,11 +593,327 @@ public class RapportFactureServiceImpl implements IRapportFactureService {
             byte[] result = bos.toByteArray();
             return result;
 
-           // DataSource fds = new ByteArrayDataSource(bos.toByteArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            // DataSource fds = new ByteArrayDataSource(bos.toByteArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         } catch (IOException ioe) {
             Logger.getLogger(RapportFactureServiceImpl.class.getName()).log(Level.SEVERE, null, ioe);
         }
         return null;
+    }
+
+   /* private void produceDataSheet(XSSFSheet dataSheet, List<HhtFactureCircuitDto> factureCircuitDtos) {
+        int rowId = 0;
+        int colId = 0;
+        Cell cell;
+        Row row = dataSheet.createRow(rowId);
+        cell = row.createCell(colId++);
+        cell.setCellValue("CODE_ROUTE");
+        cell.setCellStyle(gold);
+
+        cell = row.createCell(colId++);
+        cell.setCellValue("CODE_CD");
+        cell.setCellStyle(gold);
+        cell = row.createCell(colId++);
+        cell.setCellValue("NOM_CD");
+        cell.setCellStyle(gold);
+        cell = row.createCell(colId++);
+        cell.setCellValue("CODE_CIRCUIT");
+        cell.setCellStyle(gold);
+        cell = row.createCell(colId++);
+        cell.setCellValue("CODE_FACTURE");
+        cell.setCellStyle(gold);
+        cell = row.createCell(colId++);
+        cell.setCellValue("CODE_CLIENT");
+        cell.setCellStyle(gold);
+        cell = row.createCell(colId++);
+        cell.setCellValue("DATE_FACTURE");
+        cell.setCellStyle(gold);
+        cell = row.createCell(colId++);
+        cell.setCellValue("DATE_DEBUT");
+        cell.setCellStyle(gold);
+        cell = row.createCell(colId++);
+        cell.setCellValue("DATE_FIN");
+        cell.setCellStyle(gold);
+        cell = row.createCell(colId++);
+        cell.setCellValue("BL");
+        cell.setCellStyle(gold);
+        cell = row.createCell(colId++);
+        cell.setCellValue("CODE_VENDEUR");
+        cell.setCellStyle(gold);
+
+        rowId++;
+        colId = 0;
+
+        for (HhtFactureCircuitDto factureCircuitDto : factureCircuitDtos) {
+            row = dataSheet.createRow(rowId);
+            cell = row.createCell(colId++);
+            cell.setCellValue(factureCircuitDto.getCodeRoute().trim());
+            cell = row.createCell(colId++);
+            cell.setCellValue(factureCircuitDto.getCodeCd().trim());
+            cell = row.createCell(colId++);
+            cell.setCellValue(factureCircuitDto.getNomCd().trim());
+            cell = row.createCell(colId++);
+            cell.setCellValue(factureCircuitDto.getCodeCircuit().trim());
+            cell = row.createCell(colId++);
+            cell.setCellValue(factureCircuitDto.getCodeFact().trim());
+            cell = row.createCell(colId++);
+            cell.setCellValue(factureCircuitDto.getCodeClient().trim());
+            cell = row.createCell(colId++);
+            cell.setCellValue(getDateStringFromDate(factureCircuitDto.getDateFact()));
+            cell = row.createCell(colId++);
+            cell.setCellValue(getDateStringFromDate(factureCircuitDto.getDateDebutFact()));
+            cell = row.createCell(colId++);
+            cell.setCellValue(getDateStringFromDate(factureCircuitDto.getDateFinFact()));
+            cell = row.createCell(colId++);
+            cell.setCellValue(factureCircuitDto.getBL().trim());
+            cell = row.createCell(colId++);
+            cell.setCellValue(factureCircuitDto.getCodeVendeur().trim());
+            rowId++;
+            colId = 0;
+                    
+        }
+    }*/
+    
+    private String getDateStringFromDate(Date date){
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        return cal.get(Calendar.DAY_OF_MONTH) + "/" + (cal.get(Calendar.MONTH) + 1) + "/" + cal.get(Calendar.YEAR) + " " + String.format("%02d", cal.get(Calendar.HOUR_OF_DAY)) + ":" + String.format("%02d", cal.get(Calendar.MINUTE));
+    }
+
+    private void produceMonthDataSheet(XSSFSheet monthDataSheet, List<HhtFactureCircuitDto> factureCircuitMoisDtos) {
+        int rowId = 0;
+        int colId = 0;
+        Cell cell;
+        Row row = monthDataSheet.createRow(rowId);
+        
+        cell = row.createCell(colId++);
+        cell.setCellValue("JOUR");
+        cell.setCellStyle(gold);
+        
+        cell = row.createCell(colId++);
+        cell.setCellValue("MOIS");
+        cell.setCellStyle(gold);
+        
+        cell = row.createCell(colId++);
+        cell.setCellValue("CODE_ROUTE");
+        cell.setCellStyle(gold);
+
+        cell = row.createCell(colId++);
+        cell.setCellValue("CODE_CD");
+        cell.setCellStyle(gold);
+        cell = row.createCell(colId++);
+        cell.setCellValue("NOM_CD");
+        cell.setCellStyle(gold);
+        cell = row.createCell(colId++);
+        cell.setCellValue("CODE_CIRCUIT");
+        cell.setCellStyle(gold);
+        cell = row.createCell(colId++);
+        cell.setCellValue("CODE_FACTURE");
+        cell.setCellStyle(gold);
+        cell = row.createCell(colId++);
+        cell.setCellValue("CODE_CLIENT");
+        cell.setCellStyle(gold);
+        cell = row.createCell(colId++);
+        cell.setCellValue("DATE_FACTURE");
+        cell.setCellStyle(gold);
+        cell = row.createCell(colId++);
+        cell.setCellValue("DATE_DEBUT");
+        cell.setCellStyle(gold);
+        cell = row.createCell(colId++);
+        cell.setCellValue("DATE_FIN");
+        cell.setCellStyle(gold);
+        cell = row.createCell(colId++);
+        cell.setCellValue("BL");
+        cell.setCellStyle(gold);
+        cell = row.createCell(colId++);
+        cell.setCellValue("CODE_VENDEUR");
+        cell.setCellStyle(gold);
+
+        rowId++;
+        colId = 0;
+        Calendar cal = Calendar.getInstance();
+        for (HhtFactureCircuitDto factureCircuitDto : factureCircuitMoisDtos) {
+            row = monthDataSheet.createRow(rowId);
+            cal.setTime(factureCircuitDto.getDateFact());
+            cell = row.createCell(colId++);
+            cell.setCellValue(cal.get(Calendar.DAY_OF_MONTH));
+            cell = row.createCell(colId++);
+            cell.setCellValue(cal.get(Calendar.MONTH) + 1);
+            cell = row.createCell(colId++);
+            cell.setCellValue(factureCircuitDto.getCodeRoute().trim());
+            cell = row.createCell(colId++);
+            cell.setCellValue(factureCircuitDto.getCodeCd().trim());
+            cell = row.createCell(colId++);
+            cell.setCellValue(factureCircuitDto.getNomCd().trim());
+            cell = row.createCell(colId++);
+            cell.setCellValue(factureCircuitDto.getCodeCircuit().trim());
+            cell = row.createCell(colId++);
+            cell.setCellValue(factureCircuitDto.getCodeFact().trim());
+            cell = row.createCell(colId++);
+            cell.setCellValue(factureCircuitDto.getCodeClient().trim());
+            cell = row.createCell(colId++);
+            cell.setCellValue(getDateStringFromDate(factureCircuitDto.getDateFact()));
+            cell = row.createCell(colId++);
+            cell.setCellValue(getDateStringFromDate(factureCircuitDto.getDateDebutFact()));
+            cell = row.createCell(colId++);
+            cell.setCellValue(getDateStringFromDate(factureCircuitDto.getDateFinFact()));
+            cell = row.createCell(colId++);
+            cell.setCellValue(factureCircuitDto.getBL().trim());
+            cell = row.createCell(colId++);
+            cell.setCellValue(factureCircuitDto.getCodeVendeur().trim());
+            rowId++;
+            colId = 0;
+                    
+        }
+    }
+
+    private void produceResumeSheet(XSSFSheet raportResumeCdSheet, List<ResumeData> resumes) {
+        int rowId = 0;
+        int colId = 0;
+        Cell cell;
+        Row row = raportResumeCdSheet.createRow(rowId);
+        cell = row.createCell(colId);
+        cell.setCellValue("RAPPORT HEURE VENTES - RESUME CD");
+        cell.setCellStyle(gold);
+        raportResumeCdSheet.addMergedRegion(new CellRangeAddress(
+                rowId, //first row (0-based)
+                rowId, //last row  (0-based)
+                colId, //first column (0-based)
+                5 //last column  (0-based)
+        ));
+
+        rowId++;
+        colId = 0;
+
+        row = raportResumeCdSheet.createRow(rowId);
+        cell = row.createCell(colId);
+        cell.setCellValue("CD");
+        cell.setCellStyle(grey);
+
+        colId += 1;
+        cell = row.createCell(colId++);
+        cell.setCellValue("Heure Premier client");
+        cell.setCellStyle(myStyle3);
+        cell = row.createCell(colId++);
+        cell.setCellValue("Heure Dernier client");
+        cell.setCellStyle(myStyle3);
+        cell = row.createCell(colId++);
+        cell.setCellValue("Total Client Servis");
+        cell.setCellStyle(myStyle3);
+        cell = row.createCell(colId++);
+        cell.setCellValue("Total Clients Actifs");
+        cell.setCellStyle(myStyle3);
+
+        cell = row.createCell(colId++);
+        cell.setCellValue("Pourcentage Clients Servis (%)");
+        cell.setCellStyle(myStyle3);
+
+        rowId = 2;
+        colId = 0;
+        for (ResumeData resume : resumes) {
+            row = raportResumeCdSheet.createRow(rowId ++);
+            cell = row.createCell(colId++);
+            cell.setCellValue(resume.getNomCd().trim());
+            cell.setCellStyle(cdHeader);
+            cell = row.createCell(colId++);
+            cell.setCellValue(resume.getHeurePremierClient());
+            cell.setCellStyle(cdHeader);
+            cell = row.createCell(colId++);
+            cell.setCellValue(resume.getHeureDernierClient());
+            cell.setCellStyle(cdHeader);
+            cell = row.createCell(colId++);
+            cell.setCellValue(resume.getTotalClientServis());
+            cell.setCellStyle(cdHeader);
+            cell = row.createCell(colId++);
+            cell.setCellValue(resume.getTotalClient());
+            cell.setCellStyle(cdHeader);
+            cell = row.createCell(colId++);
+            cell.setCellValue(resume.getPorcentage());
+            cell.setCellStyle(cdHeader);
+            colId = 0;
+        }
+    }
+    
+    class ResumeData{
+        private String nomCd;
+        
+        private String heurePremierClient;
+        
+        private String heureDernierClient;
+        
+        private int totalClientServis;
+        
+        private int totalClient;
+        
+        private double porcentage;
+
+        public ResumeData(String nomCd, String heurePremierClient, String heureDernierClient, int totalClientServis, int totalClient, double porcentage) {
+            this.nomCd = nomCd;
+            this.heurePremierClient = heurePremierClient;
+            this.heureDernierClient = heureDernierClient;
+            this.totalClientServis = totalClientServis;
+            this.totalClient = totalClient;
+            this.porcentage = porcentage;
+        }
+
+        public ResumeData() {
+        }
+
+        public String getNomCd() {
+            return nomCd;
+        }
+
+        public void setNomCd(String nomCd) {
+            this.nomCd = nomCd;
+        }
+
+        public String getHeurePremierClient() {
+            return heurePremierClient;
+        }
+
+        public void setHeurePremierClient(String heurePremierClient) {
+            this.heurePremierClient = heurePremierClient;
+        }
+
+        public String getHeureDernierClient() {
+            return heureDernierClient;
+        }
+
+        public void setHeureDernierClient(String heureDernierClient) {
+            this.heureDernierClient = heureDernierClient;
+        }
+
+        public int getTotalClientServis() {
+            return totalClientServis;
+        }
+
+        public void setTotalClientServis(int totalClientServis) {
+            this.totalClientServis = totalClientServis;
+        }
+
+        public int getTotalClient() {
+            return totalClient;
+        }
+
+        public void setTotalClient(int totalClient) {
+            this.totalClient = totalClient;
+        }
+
+        public double getPorcentage() {
+            return porcentage;
+        }
+
+        public void setPorcentage(double porcentage) {
+            this.porcentage = porcentage;
+        }
+        
+        
+
+        @Override
+        public String toString() {
+            return "ResumeData{" + "nomCd=" + nomCd + ", heurePremierClient=" + heurePremierClient + ", heureDernierClient=" + heureDernierClient + ", totalClientServis=" + totalClientServis + ", totalClient=" + totalClient + ", porcentage=" + porcentage + '}';
+        }
+        
+        
     }
 
 }

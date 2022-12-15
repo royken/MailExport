@@ -9,6 +9,7 @@ import com.bracongo.mailexport.data.dto.ProduitHectoRateeDto;
 import com.bracongo.mailexport.data.dto.ProduitRatee;
 import com.bracongo.mailexport.data.dto.VenteRateeCdDto;
 import com.bracongo.mailexport.service.IVenteRateeService;
+import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -68,6 +69,7 @@ public class VenteRateeServiceImpl implements IVenteRateeService {
     float ury;
 
     XSSFColor b = new XSSFColor(new java.awt.Color(255, 255, 255));
+    XSSFColor blackBorderColor = new XSSFColor(Color.BLACK);
 
     XSSFCellStyle grey;
 
@@ -236,9 +238,10 @@ public class VenteRateeServiceImpl implements IVenteRateeService {
             MimeMessageHelper helper = new MimeMessageHelper(message);
 
             //helper.setTo("ddis@bracongo.cd");
-            helper.setTo(new String[]{"ddis@bracongo.cd", "g.nkulu@bracongo.cd", "h.onandjeka@bracongo.cd"});
+            helper.setTo(new String[]{"jason.djemo@castel-afrique.com", "gregoire.sombolayi@castel-afrique.com", "nadege.vundu@castel-afrique.com", "anaclet.lawaba@castel-afrique.com", "guelor.nkulu@castel-afrique.com", "jeremie.lutunu@castel-afrique.com", "bangoma.dakwa@castel-afrique.com", "rosine.modiri@castel-afrique.com"});
             helper.setSubject("Rapport Ventes ratées et Erreurs cumulées du mois");
-            helper.setFrom("rdsid@bracongo.cd");
+            helper.setCc("valmy.roikenfack@castel-afrique.com");
+            helper.setFrom("BRACONGO.Reportbusiness@castel-afrique.com");
             MimeBodyPart messageBodyPart1 = new MimeBodyPart();
             messageBodyPart1.setDataHandler(new DataHandler(fds));
 

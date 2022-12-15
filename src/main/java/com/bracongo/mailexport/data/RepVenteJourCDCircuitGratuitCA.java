@@ -15,7 +15,7 @@ import javax.persistence.Temporal;
  * @author vr.kenfack
  */
 @Entity
-@Table(name = "REP_VENTE_CD_CIRCUIT_JOUR_GRATUIT_CA", catalog = "HHT_BRACONGO", schema = "dbo")
+@Table(name = "REP_VENTE_CD_CIRCUIT_JOUR_GRATUIT_CA", schema = "dbo")
 public class RepVenteJourCDCircuitGratuitCA implements Serializable{
     
     @Id
@@ -57,7 +57,7 @@ public class RepVenteJourCDCircuitGratuitCA implements Serializable{
     @Column(name = "CODARS")
     private String codars;
     
-    @Column(name = "PRIX_TH")
+    @Column(name = "PRIX_HT")
     private double prixHt;
     
     @Column(name = "PRIX_TTC")
@@ -65,10 +65,32 @@ public class RepVenteJourCDCircuitGratuitCA implements Serializable{
     
     @Column(name = "TTS")
     private String tts;
-
-    public RepVenteJourCDCircuitGratuitCA() {
-    }    
     
+    @Column(name = "QUANTITE_RP2LI")
+    private double quantiteRp2li;
+    
+    @Column(name = "HECTO_RP2LI")
+    private double hectoRp2li;
+    
+    @Column(name = "SENS")
+    private String sens;
+    
+    @Column(name = "TAXAR")
+    private String taxar;
+    
+    @Column(name = "NSCHTX")
+    private String nschtx;
+    
+    @Column(name = "NTD")
+    private int ntd;
+    
+    @Column(name = "TYPST2")
+    private String typst2;
+    
+    @Column(name = "SS")
+    private String ss;
+
+
 
     public Long getId() {
         return id;
@@ -190,11 +212,74 @@ public class RepVenteJourCDCircuitGratuitCA implements Serializable{
         this.tts = tts;
     }
 
+    public double getQuantiteRp2li() {
+        return quantiteRp2li;
+    }
+
+    public void setQuantiteRp2li(double quantiteRp2li) {
+        this.quantiteRp2li = quantiteRp2li;
+    }
+
+    public double getHectoRp2li() {
+        return hectoRp2li;
+    }
+
+    public void setHectoRp2li(double hectoRp2li) {
+        this.hectoRp2li = hectoRp2li;
+    }
+
+    public String getSens() {
+        return sens;
+    }
+
+    public void setSens(String sens) {
+        this.sens = sens;
+    }
+
+    public String getTaxar() {
+        return taxar;
+    }
+
+    public void setTaxar(String taxar) {
+        this.taxar = taxar;
+    }
+
+    public String getNschtx() {
+        return nschtx;
+    }
+
+    public void setNschtx(String nschtx) {
+        this.nschtx = nschtx;
+    }
+
+    public int getNtd() {
+        return ntd;
+    }
+
+    public void setNtd(int ntd) {
+        this.ntd = ntd;
+    }
+
+    public String getTypst2() {
+        return typst2;
+    }
+
+    public void setTypst2(String typst2) {
+        this.typst2 = typst2;
+    }
+
+    public String getSs() {
+        return ss;
+    }
+
+    public void setSs(String ss) {
+        this.ss = ss;
+    }
+    
 
     @Override
     public String toString() {
         return "VenteJourCDCircuitGratuitCA{" + "id=" + id + ", hecto=" + hecto + ", casier=" + casier + ", famille=" + famille + ", mois=" + mois + ", jour=" + jour + ", annee=" + annee + ", dateLongue=" + dateLongue + ", codeCD=" + codeCD + ", codeCircuit=" + codeCircuit + ", nomProduit=" + nomProduit + ", codars=" + codars + ", prixHt=" + prixHt + ", prixTtc=" + prixTtc + ", tts=" + tts + '}';
     }
-    
     
 }

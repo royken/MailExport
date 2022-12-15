@@ -69,4 +69,10 @@ public class VenteRateeCtrl {
          infoBiService.produceRapportDataAndMail();
     }
     
+    @RequestMapping(method = RequestMethod.GET, value = "mail3")
+    @CrossOrigin(origins = "*")
+    public void testMail3(){
+         infoBiService.produceAndExportArticleTarifTaxe();
+    }
+    
 }

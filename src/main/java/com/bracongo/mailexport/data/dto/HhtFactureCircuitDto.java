@@ -30,6 +30,8 @@ public class HhtFactureCircuitDto implements Serializable{
     private String BL;
     
     private String codeVendeur;
+    
+    private String client;
 
     public HhtFactureCircuitDto(String codeRoute, String codeCd, String nomCd, String codeCircuit, String codeFact, Date dateFact, String codeClient, Date dateDebutFact, Date dateFinFact, String BL, String codeVendeur) {
         this.codeRoute = codeRoute;
@@ -44,7 +46,22 @@ public class HhtFactureCircuitDto implements Serializable{
         this.BL = BL;
         this.codeVendeur = codeVendeur;
     }
-
+    
+    
+    public HhtFactureCircuitDto(String codeRoute, String codeCd, String nomCd, String codeCircuit, String codeFact, Date dateFact, String codeClient, Date dateDebutFact, Date dateFinFact, String BL, String codeVendeur, String client) {
+        this.codeRoute = codeRoute;
+        this.codeCd = codeCd;
+        this.nomCd = nomCd;
+        this.codeCircuit = codeCircuit;
+        this.codeFact = codeFact;
+        this.dateFact = dateFact;
+        this.codeClient = codeClient;
+        this.dateDebutFact = dateDebutFact;
+        this.dateFinFact = dateFinFact;
+        this.BL = BL;
+        this.codeVendeur = codeVendeur;
+        this.client = client;
+    }
     
 
     public HhtFactureCircuitDto() {
@@ -139,6 +156,15 @@ public class HhtFactureCircuitDto implements Serializable{
     public void setCodeVendeur(String codeVendeur) {
         this.codeVendeur = codeVendeur;
     }
+
+    public String getClient() {
+        return client;
+    }
+
+    public void setClient(String client) {
+        this.client = client;
+    }
+     
 
     @Override
     public String toString() {

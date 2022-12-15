@@ -14,4 +14,10 @@ import org.springframework.stereotype.Repository;
 public interface ITbCentreDistributionDao extends JpaRepository<TbCentreDistribution, Long>{
     @Query("select cd from TbCentreDistribution cd where cd.cdiCapacitecd > 0")
     public List<TbCentreDistribution> getAllCd();
+    
+    @Query("select cd from TbCentreDistribution cd where cd.cdiStatut = 'ACTIF' and cd.cdiCdtournesol = 1")
+    public List<TbCentreDistribution> getAllCdTournesol();
+    
+    @Query("select cd from TbCentreDistribution cd where cd.cdiStatut = 'ACTIF' and cd.cdiCdsigma = 1")
+    public List<TbCentreDistribution> getAllCdSigma();
 }

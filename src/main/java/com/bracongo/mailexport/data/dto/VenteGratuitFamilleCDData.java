@@ -70,7 +70,7 @@ public class VenteGratuitFamilleCDData {
             return "XXL" ;
         }
         else if(vente.getGamme().contains("EAU")){
-            return "EAU" ;
+            return "EAUX" ;
         }
         else if("VIN".equals(vente.getGamme())){
             return "VIN";

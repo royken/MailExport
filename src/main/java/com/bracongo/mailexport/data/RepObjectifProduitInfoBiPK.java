@@ -1,6 +1,7 @@
 package com.bracongo.mailexport.data;
 
 import java.io.Serializable;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
@@ -54,6 +55,44 @@ public class RepObjectifProduitInfoBiPK implements Serializable{
     public void setCodeCd(String codeCd) {
         this.codeCd = codeCd;
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(this.codeInfoBi);
+        hash = 31 * hash + this.mois;
+        hash = 31 * hash + Objects.hashCode(this.codeCd);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final RepObjectifProduitInfoBiPK other = (RepObjectifProduitInfoBiPK) obj;
+        if (this.mois != other.mois) {
+            return false;
+        }
+        if (this.annee != other.annee) {
+            return false;
+        }
+        if (!Objects.equals(this.codeInfoBi, other.codeInfoBi)) {
+            return false;
+        }
+        if (!Objects.equals(this.codeCd, other.codeCd)) {
+            return false;
+        }
+        return true;
+    }
+    
+    
 
     @Override
     public String toString() {

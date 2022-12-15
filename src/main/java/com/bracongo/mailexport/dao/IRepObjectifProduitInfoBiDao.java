@@ -63,7 +63,7 @@ public interface IRepObjectifProduitInfoBiDao extends JpaRepository<RepObjectifP
     
     @Query("select new com.bracongo.mailexport.data.dto.BudgetInfoBiByCDMoisFamilleDto("
             + " objectif.repObjectifProduitInfoBiPK.codeCd, "
-             + " objectif.repObjectifProduitInfoBiPK.mois, "
+            + " objectif.repObjectifProduitInfoBiPK.mois, "
             + " sum(objectif.budget),  "
             + " article.famille ) "
             + " from RepObjectifProduitInfoBi objectif, RepArticleInfoBi article"

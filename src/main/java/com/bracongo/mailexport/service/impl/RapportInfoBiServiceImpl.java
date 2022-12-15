@@ -1,16 +1,26 @@
 package com.bracongo.mailexport.service.impl;
 
 import com.bracongo.mailexport.dao.IRepArticleInfoBiDao;
+import com.bracongo.mailexport.dao.IRepArticleSigmaDao;
+import com.bracongo.mailexport.dao.IRepDegradationDao;
 import com.bracongo.mailexport.dao.IRepObjectifProduitInfoBiDao;
+import com.bracongo.mailexport.dao.IRepTarifArticleDao;
+import com.bracongo.mailexport.dao.IRepTaxeArticleDao;
 import com.bracongo.mailexport.dao.IRepVentesGratuitCDDao;
+import com.bracongo.mailexport.dao.ITbArticleDao;
 import com.bracongo.mailexport.dao.ITbCentreDistributionDao;
 import com.bracongo.mailexport.data.RepArticleInfoBi;
+import com.bracongo.mailexport.data.RepArticleSigma;
 import com.bracongo.mailexport.data.RepObjectifProduitInfoBi;
+import com.bracongo.mailexport.data.RepTarifArticles;
+import com.bracongo.mailexport.data.RepTaxeArticle;
+import com.bracongo.mailexport.data.TbArticle;
 import com.bracongo.mailexport.data.TbCentreDistribution;
 import com.bracongo.mailexport.data.dto.BudgetGlobalProduitByCd;
 import com.bracongo.mailexport.data.dto.BudgetInfoBiByCDMoisFamilleDto;
 import com.bracongo.mailexport.data.dto.BudgetInfoBiByMoisAnneeDto;
 import com.bracongo.mailexport.data.dto.BudgetInfoBiGlobalMoisAnneeDto;
+import com.bracongo.mailexport.data.dto.DegradationArticleDto;
 import com.bracongo.mailexport.data.dto.VenteEtGratuitGammeCdMoisAnneeDto;
 import com.bracongo.mailexport.data.dto.VenteEtGratuitInfoBiFamilleCDMois;
 import com.bracongo.mailexport.data.dto.VenteGratuitFamilleCDData;
@@ -80,6 +90,21 @@ public class RapportInfoBiServiceImpl implements IRapportInfoBiService {
 
     @Autowired
     private JavaMailSender sender;
+
+    @Autowired
+    private ITbArticleDao articleDao;
+
+    @Autowired
+    private IRepTarifArticleDao tarifArticleDao;
+
+    @Autowired
+    private IRepTaxeArticleDao taxeArticleDao;
+
+    @Autowired
+    private IRepArticleSigmaDao articleSigmaDao;
+
+    @Autowired
+    private IRepDegradationDao degradationDao;
 
     float llx;
     float lly;
@@ -207,7 +232,7 @@ public class RapportInfoBiServiceImpl implements IRapportInfoBiService {
             greenFont.setFontHeightInPoints((short) 10);
             greenFont.setFontName("Arial");
             greenFont.setColor(IndexedColors.GREEN.getIndex());
-            
+
             XSSFFont redFont = workbook.createFont();
             greenFont.setFontHeightInPoints((short) 10);
             greenFont.setFontName("Arial");
@@ -285,7 +310,7 @@ public class RapportInfoBiServiceImpl implements IRapportInfoBiService {
             topThickBorder = workbook.createCellStyle();
             topThickBorder.setTopBorderColor(blackBorderColor);
             topThickBorder.setBorderTop(BorderStyle.THICK);
-            
+
             bottomThickBorder = workbook.createCellStyle();
             bottomThickBorder.setBottomBorderColor(blackBorderColor);
             bottomThickBorder.setBorderBottom(BorderStyle.THICK);
@@ -470,7 +495,7 @@ public class RapportInfoBiServiceImpl implements IRapportInfoBiService {
             List<VenteGratuitFamilleCDData> ventesGlobalByMoisCdFamilleNMUn_ = getListVenteByFamille(ventesGlobalByMoisCdFamille, famille);
 
             row = recapSheet.createRow(rowId);
-           // venteRow = recapSheet.createRow(rowId);
+            // venteRow = recapSheet.createRow(rowId);
             budgetRow = recapSheet.createRow(rowId + 1);
             variationRow = recapSheet.createRow(rowId + 2);
             cell = row.createCell(colId);
@@ -484,7 +509,7 @@ public class RapportInfoBiServiceImpl implements IRapportInfoBiService {
             ));
             cell.setCellStyle(tableHeader);
             colId++;
-            
+
             venteCell = row.createCell(colId);
             budgetCell = budgetRow.createCell(colId);
             variationCell = variationRow.createCell(colId);
@@ -509,8 +534,7 @@ public class RapportInfoBiServiceImpl implements IRapportInfoBiService {
                 venteCell.setCellValue(venteMoisCd);
                 if (counter == 1) {
                     venteCell.setCellStyle(leftTopThickBorder);
-                }
-                else if (counter == cds.size()) {
+                } else if (counter == cds.size()) {
                     venteCell.setCellStyle(rightTopThickBorder);
                 } else {
                     venteCell.setCellStyle(topThickBorder);
@@ -519,17 +543,14 @@ public class RapportInfoBiServiceImpl implements IRapportInfoBiService {
                 budgetCell.setCellValue(budgetMoisCd);
                 if (counter == 1) {
                     budgetCell.setCellStyle(leftThickBorder);
-                }
-                
-                else if (counter == cds.size()) {
+                } else if (counter == cds.size()) {
                     budgetCell.setCellStyle(rightThickBorder);
                 }
 
                 variationCell.setCellValue(variation + "%");
                 if (counter == 1) {
                     variationCell.setCellStyle(leftBottomThickBorder);
-                }
-                else if (counter == cds.size()) {
+                } else if (counter == cds.size()) {
                     variationCell.setCellStyle(rightBottomThickBorder);
                 } else {
                     variationCell.setCellStyle(bottomThickBorder);
@@ -581,13 +602,13 @@ public class RapportInfoBiServiceImpl implements IRapportInfoBiService {
                     colId //last column  (0-based)
             ));
             cell.setCellStyle(tableHeader);
-            colId ++;
+            colId++;
             venteCell = row.createCell(colId);
             budgetCell = budgetRow.createCell(colId);
             variationCell = variationRow.createCell(colId);
-            venteCell.setCellValue( year + " RL");
+            venteCell.setCellValue(year + " RL");
             venteCell.setCellStyle(leftRightTopThickBorder);
-            budgetCell.setCellValue( year + " BU");
+            budgetCell.setCellValue(year + " BU");
             budgetCell.setCellStyle(leftRightThickBorder);
             variationCell.setCellValue("Variation");
             variationCell.setCellStyle(leftRightBottomThickBorder);
@@ -680,7 +701,7 @@ public class RapportInfoBiServiceImpl implements IRapportInfoBiService {
             colId = 1;
             counter2++;
         }
-        
+
     }
 
     private void produceBudgetSheet(XSSFSheet budgetSheet, List<RepArticleInfoBi> articles, List<TbCentreDistribution> cds, List<VenteGratuitProduitAnneeDto> ventesProduitNMUn, List<VenteGratuitGlobalByMoisAnnee> ventesGlobalNMUn, List<BudgetInfoBiByMoisAnneeDto> budgetsMoisProduit, List<BudgetGlobalProduitByCd> budgetGlobalProduitsByCD, List<BudgetInfoBiGlobalMoisAnneeDto> budgetGlobalMois, List<BudgetInfoBiByCDMoisFamilleDto> budgetFamilles, List<VenteGratuitFamilleCDData> ventesGlobalByMoisCdFamilleNMUn) {
@@ -1769,4 +1790,240 @@ public class RapportInfoBiServiceImpl implements IRapportInfoBiService {
         }
         return result;
     }
+
+    @Override
+    public void produceAndExportArticleTarifTaxe() {
+        try {
+            Calendar cal = Calendar.getInstance();
+            //cal.add(Calendar.DATE, -1);
+            List<RepArticleSigma> articles = articleSigmaDao.getAllProduit();
+            List<TbCentreDistribution> cds = centreDistributionDao.getAllCdSigma();
+            List<RepTarifArticles> tarifs = tarifArticleDao.getAllTarif();
+            List<RepTaxeArticle> taxes = taxeArticleDao.getAllTaxesByDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1, cal.get(Calendar.DATE));
+            List<DegradationArticleDto> degradations = degradationDao.getAllValidDegration(new Date());
+
+            XSSFWorkbook workbook = new XSSFWorkbook();
+
+            XSSFSheet recapSheet = workbook.createSheet("RECAP");
+            produceReportSheet(recapSheet, articles, cds, tarifs, taxes, degradations);
+            File file = File.createTempFile("Rapport", "xlsx");
+            file.deleteOnExit();
+            Path path = file.toPath();
+            FileOutputStream fileOut = new FileOutputStream(file);
+            /* workbook.write(fileOut);
+            fileOut.close();
+            DataSource fds = new FileDataSource("temp.xls");
+             */
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            workbook.write(bos); // write excel data to a byte array
+            fileOut.close();
+
+// Now use your ByteArrayDataSource as
+            DataSource fds = new ByteArrayDataSource(bos.toByteArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            MimeMessage message = sender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message);
+
+            helper.setTo(new String[]{"freddy.kalombo@castel-afrique.com", "mamadou.salam@castel-afrique.com", "karine.ngondo@castel-afrique.com"});
+            helper.setSubject("Articles Taxes PU Degradations");
+            helper.setCc("valmy.roikenfack@castel-afrique.com");
+            helper.setFrom("valmy.roikenfack@castel-afrique.com");
+            MimeBodyPart messageBodyPart1 = new MimeBodyPart();
+            messageBodyPart1.setDataHandler(new DataHandler(fds));
+
+//messageBodyPart1.setFileName(fds.getName());
+            messageBodyPart1.setFileName("Articles_Taxes_PU_Degradations.xlsx");
+            Multipart mpart = new MimeMultipart();
+            mpart.addBodyPart(messageBodyPart1);
+            message.setContent(mpart);
+            sender.send(message);
+        } catch (IOException | MessagingException ex) {
+            Logger.getLogger(RapportInfoBiServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
+    private void produceReportSheet(XSSFSheet recapSheet, List<RepArticleSigma> articles, List<TbCentreDistribution> cds, List<RepTarifArticles> tarifs, List<RepTaxeArticle> taxes, List<DegradationArticleDto> degradations) {
+        int rowId = 0;
+        int colId = 0;
+        Row row = recapSheet.createRow(rowId++);
+        Cell cell;
+        cell = row.createCell(colId++);
+        cell.setCellValue("Code CD");
+        cell.setCellStyle(tableHeader);
+        cell = row.createCell(colId++);
+        cell.setCellValue("NOM CD");
+        cell.setCellStyle(tableHeader);
+        cell = row.createCell(colId++);
+        cell.setCellValue("CODE PRODUIT");
+        cell.setCellStyle(tableHeader);
+        cell = row.createCell(colId++);
+        cell.setCellValue("NOM PRODUIT");
+        cell.setCellStyle(tableHeader);
+        cell = row.createCell(colId++);
+        cell.setCellValue("FAMILLE PRODUIT");
+        cell.setCellStyle(tableHeader);
+        cell = row.createCell(colId++);
+        cell.setCellValue("PRIX_U");
+        cell.setCellStyle(tableHeader);
+        cell = row.createCell(colId++);
+        cell.setCellValue("TAXE1");
+        cell.setCellStyle(tableHeader);
+        cell = row.createCell(colId++);
+        cell.setCellValue("TAXE2");
+        cell.setCellStyle(tableHeader);
+        cell = row.createCell(colId++);
+        cell.setCellValue("TAXE3");
+        cell.setCellStyle(tableHeader);
+        cell = row.createCell(colId++);
+        cell.setCellValue("TAXE4");
+        cell.setCellStyle(tableHeader);
+        cell = row.createCell(colId++);
+        cell.setCellValue("FONCTIONNEMENT CFC");
+        cell.setCellStyle(tableHeader);
+        cell = row.createCell(colId++);
+        cell.setCellValue("TRANSPORT INTER-DEPOT DIT");
+        cell.setCellStyle(tableHeader);
+        cell = row.createCell(colId++);
+        cell.setCellValue("TRANSPORT SRD DTS");
+        cell.setCellStyle(tableHeader);
+        cell = row.createCell(colId++);
+        cell.setCellValue("DIFFERENIEL TRANSPORT SRD DIS");
+        cell.setCellStyle(tableHeader);
+        cell = row.createCell(colId++);
+        cell.setCellValue("CAUTION TIN");
+        cell.setCellStyle(tableHeader);
+        cell = row.createCell(colId++);
+        cell.setCellValue("REMISE SUR FACTURE RSF - U");
+        cell.setCellStyle(tableHeader);
+        cell = row.createCell(colId++);
+        cell.setCellValue("REMISE SUR FACTURE RSF - R");
+        cell.setCellStyle(tableHeader);
+
+        rowId++;
+        colId = 0;
+
+        for (RepArticleSigma article : articles) {
+            // System.out.println("codars = " + article.getCodar());
+            List<DegradationArticleDto> degradationsarticle = getByArticle(degradations, article.getCodar().trim());
+            //System.out.println("size = " + degradationsarticle.size() + " - " +degradationsarticle.toString());
+            for (TbCentreDistribution cd : cds) {
+                row = recapSheet.createRow(rowId++);
+                cell = row.createCell(colId++);
+                cell.setCellValue(cd.getCdiCodecd().trim());
+                cell = row.createCell(colId++);
+                cell.setCellValue(cd.getCdiNomcdi().trim());
+                cell = row.createCell(colId++);
+                cell.setCellValue(article.getCodar().trim());
+                cell = row.createCell(colId++);
+                cell.setCellValue(article.getDesar().trim());
+                cell = row.createCell(colId++);
+                cell.setCellValue(article.getFamille());
+                cell = row.createCell(colId++);
+
+                RepTarifArticles tarif = getTarifArticleProduitByCd(article.getCodar().trim(), cd.getCdiCodetarif().trim(), tarifs);
+                if (tarif == null || tarif.getTarif() == null) {
+                    cell.setCellValue("0");
+                } else {
+                    cell.setCellValue(tarif.getTarif());
+                }
+
+                cell = row.createCell(colId++);
+                String lettreTiers = cd.getCdiTiers() == null ? "" : cd.getCdiTiers();
+                String codeTaxe = lettreTiers.trim() + article.getTaxar().trim();
+                RepTaxeArticle taxe = getTaxeByArticleCd(article.getCodar().trim(), codeTaxe, taxes);
+                cell.setCellValue(taxe.getT1Copr());
+                cell = row.createCell(colId++);
+                cell.setCellValue(taxe.getT2Copr());
+                cell = row.createCell(colId++);
+                cell.setCellValue(taxe.getT3Copr());
+                cell = row.createCell(colId++);
+                cell.setCellValue(taxe.getT4Copr());
+
+                String[] types = new String[]{"CFC", "DIT", "DTS", "DIS", "TIN"}; // toutes les degradations sauf RSF qui est traité en deux parties plus bas
+
+                for (String type : types) {
+                    DegradationArticleDto degradation = getByTypeCd(type, cd.getCdiCodecd().trim(), degradationsarticle);
+                    cell = row.createCell(colId++);
+                    cell.setCellValue(degradation.getValeurDegradation());
+                }
+                // RSF U : resime sur facture pour les enlèvements CD
+
+                DegradationArticleDto deg = getRemiseSurFacture1FactureByTypeCd(cd.getCdiCodecd().trim(), degradationsarticle);
+                cell = row.createCell(colId++);
+                cell.setCellValue(deg.getValeurDegradation());
+
+                // RSF R : resime sur facture client
+                DegradationArticleDto deg2 = getRemiseSurFacture2FactureByTypeCd(cd.getCdiCodecd().trim(), degradationsarticle);
+                cell = row.createCell(colId++);
+                cell.setCellValue(deg2.getValeurDegradation());
+                //rowId++;
+                colId = 0;
+            }
+
+        }
+    }
+
+    private RepTaxeArticle getTaxeByArticleCd(String codars, String codeTaxar, List<RepTaxeArticle> taxes) {
+        RepTaxeArticle result = new RepTaxeArticle();
+        for (RepTaxeArticle taxe : taxes) {
+            if (taxe.getCodeTaxe() == null ? codeTaxar.trim() == null : taxe.getCodeTaxe().equals(codeTaxar.trim())) {
+                return taxe;
+            }
+        }
+        return result;
+    }
+
+    private RepTarifArticles getTarifArticleProduitByCd(String codars, String codeTarif, List<RepTarifArticles> tarifs) {
+
+        for (RepTarifArticles tarif : tarifs) {
+            if ((tarif.getCodars().trim()).equalsIgnoreCase(codars.trim()) && (tarif.getCodeTarif().trim()).equalsIgnoreCase(codeTarif.trim())) {
+                return tarif;
+            }
+        }
+        return new RepTarifArticles();
+    }
+
+    private List<DegradationArticleDto> getByArticle(List<DegradationArticleDto> degradations, String codars) {
+        List<DegradationArticleDto> result = new ArrayList<>();
+        for (DegradationArticleDto degradation : degradations) {
+            if ((degradation.getCodars().trim()).equalsIgnoreCase(codars)) {
+                result.add(degradation);
+            }
+        }
+        return result;
+    }
+
+    private DegradationArticleDto getByTypeCd(String type, String codeCd, List<DegradationArticleDto> degradations) {
+        DegradationArticleDto result = new DegradationArticleDto();
+
+        for (DegradationArticleDto degradation : degradations) {
+            if ((degradation.getCodeCd().trim()).equalsIgnoreCase(codeCd) && (degradation.getRubrique().trim()).equalsIgnoreCase(type)) {
+                return degradation;
+            }
+        }
+        return result;
+    }
+
+    private DegradationArticleDto getRemiseSurFacture1FactureByTypeCd(String codeCd, List<DegradationArticleDto> degradations) {
+        DegradationArticleDto result = new DegradationArticleDto();
+
+        for (DegradationArticleDto degradation : degradations) {
+            if ((degradation.getCodeCd().trim()).equalsIgnoreCase(codeCd) && (degradation.getRubrique().trim()).equalsIgnoreCase("RSF") && degradation.getArgtDg().contains("U")) {
+                return degradation;
+            }
+        }
+        return result;
+    }
+
+    private DegradationArticleDto getRemiseSurFacture2FactureByTypeCd(String codeCd, List<DegradationArticleDto> degradations) {
+        DegradationArticleDto result = new DegradationArticleDto();
+
+        for (DegradationArticleDto degradation : degradations) {
+            if ((degradation.getCodeCd().trim()).equalsIgnoreCase(codeCd) && (degradation.getRubrique().trim()).equalsIgnoreCase("RSF") && degradation.getArgtDg().contains("R")) {
+                return degradation;
+            }
+        }
+        return result;
+    }
+
 }

@@ -46,7 +46,7 @@ public class ChargementCtrl {
     @CrossOrigin(origins = "*")
     public void test() {
         System.out.println("ctrl import");
-        dataService.importArticleInfoBi();
+        dataService.importArticleCorrInfoBi();
     }
     
     @RequestMapping(method = RequestMethod.GET, value = "test2")
@@ -61,6 +61,20 @@ public class ChargementCtrl {
     public void test3() {
         System.out.println("ctrl import3");
         dataService.importTauxChange();
+    }
+    
+    @RequestMapping(method = RequestMethod.GET, value = "maile")
+    @CrossOrigin(origins = "*")
+    public void mail() {
+        System.out.println("ctrl import3");
+        chargementService.produceChargementResumeAndMail();
+    }
+    
+    @RequestMapping(method = RequestMethod.GET, value = "test4")
+    @CrossOrigin(origins = "*")
+    public void test4() {
+        System.out.println("ctrl import4");
+        dataService.importTaxes();
     }
     
 }

@@ -29,7 +29,13 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "TbCentreDistribution.findByCdiPosgeo", query = "SELECT t FROM TbCentreDistribution t WHERE t.cdiPosgeo = :cdiPosgeo"),
     @NamedQuery(name = "TbCentreDistribution.findByCdiVille", query = "SELECT t FROM TbCentreDistribution t WHERE t.cdiVille = :cdiVille"),
     @NamedQuery(name = "TbCentreDistribution.findByCdiJourcouv", query = "SELECT t FROM TbCentreDistribution t WHERE t.cdiJourcouv = :cdiJourcouv"),
-    @NamedQuery(name = "TbCentreDistribution.findByCdiCapacitecd", query = "SELECT t FROM TbCentreDistribution t WHERE t.cdiCapacitecd = :cdiCapacitecd")})
+    @NamedQuery(name = "TbCentreDistribution.findByCdiCapacitecd", query = "SELECT t FROM TbCentreDistribution t WHERE t.cdiCapacitecd = :cdiCapacitecd"),
+    @NamedQuery(name = "TbCentreDistribution.findByCdiCdsigma", query = "SELECT t FROM TbCentreDistribution t WHERE t.cdiCdsigma = :cdiCdsigma"),
+    @NamedQuery(name = "TbCentreDistribution.findByCdiCdtournesol", query = "SELECT t FROM TbCentreDistribution t WHERE t.cdiCdtournesol = :cdiCdtournesol"),
+    @NamedQuery(name = "TbCentreDistribution.findByCdiStatut", query = "SELECT t FROM TbCentreDistribution t WHERE t.cdiStatut = :cdiStatut"),
+    @NamedQuery(name = "TbCentreDistribution.findByCdiLettreTiers", query = "SELECT t FROM TbCentreDistribution t WHERE t.cdiLettreTiers = :cdiLettreTiers"),
+    @NamedQuery(name = "TbCentreDistribution.findByCdiTiers", query = "SELECT t FROM TbCentreDistribution t WHERE t.cdiTiers = :cdiTiers"),
+    @NamedQuery(name = "TbCentreDistribution.findByCdiCodetarif", query = "SELECT t FROM TbCentreDistribution t WHERE t.cdiCodetarif = :cdiCodetarif")})
 public class TbCentreDistribution implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -47,6 +53,18 @@ public class TbCentreDistribution implements Serializable {
     private Short cdiJourcouv;
     @Column(name = "CDI_CAPACITECD")
     private Integer cdiCapacitecd;
+    @Column(name = "CDI_CDSIGMA")
+    private Boolean cdiCdsigma;
+    @Column(name = "CDI_CDTOURNESOL")
+    private Boolean cdiCdtournesol;
+    @Column(name = "CDI_STATUT")
+    private String cdiStatut;
+    @Column(name = "CDI_LETTRE_TIERS")
+    private String cdiLettreTiers;
+    @Column(name = "CDI_TIERS")
+    private String cdiTiers;
+    @Column(name = "CDI_CODETARIF")
+    private String cdiCodetarif;
 
     public TbCentreDistribution() {
     }
@@ -103,6 +121,54 @@ public class TbCentreDistribution implements Serializable {
         this.cdiCapacitecd = cdiCapacitecd;
     }
 
+    public Boolean getCdiCdsigma() {
+        return cdiCdsigma;
+    }
+
+    public void setCdiCdsigma(Boolean cdiCdsigma) {
+        this.cdiCdsigma = cdiCdsigma;
+    }
+
+    public Boolean getCdiCdtournesol() {
+        return cdiCdtournesol;
+    }
+
+    public void setCdiCdtournesol(Boolean cdiCdtournesol) {
+        this.cdiCdtournesol = cdiCdtournesol;
+    }
+
+    public String getCdiStatut() {
+        return cdiStatut;
+    }
+
+    public void setCdiStatut(String cdiStatut) {
+        this.cdiStatut = cdiStatut;
+    }
+
+    public String getCdiLettreTiers() {
+        return cdiLettreTiers;
+    }
+
+    public void setCdiLettreTiers(String cdiLettreTiers) {
+        this.cdiLettreTiers = cdiLettreTiers;
+    }
+
+    public String getCdiTiers() {
+        return cdiTiers;
+    }
+
+    public void setCdiTiers(String cdiTiers) {
+        this.cdiTiers = cdiTiers;
+    }
+
+    public String getCdiCodetarif() {
+        return cdiCodetarif;
+    }
+
+    public void setCdiCodetarif(String cdiCodetarif) {
+        this.cdiCodetarif = cdiCodetarif;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
@@ -125,7 +191,9 @@ public class TbCentreDistribution implements Serializable {
 
     @Override
     public String toString() {
-        return "com.bracongo.bracongoapi.entities.TbCentreDistribution[ cdiCodecd=" + cdiCodecd + " ]";
+        return "TbCentreDistribution{" + "cdiCodecd=" + cdiCodecd + ", cdiNomcdi=" + cdiNomcdi + ", cdiPosgeo=" + cdiPosgeo + ", cdiVille=" + cdiVille + ", cdiJourcouv=" + cdiJourcouv + ", cdiCapacitecd=" + cdiCapacitecd + ", cdiCdsigma=" + cdiCdsigma + ", cdiCdtournesol=" + cdiCdtournesol + ", cdiStatut=" + cdiStatut + ", cdiLettreTiers=" + cdiLettreTiers + ", cdiTiers=" + cdiTiers + ", cdiCodetarif=" + cdiCodetarif + '}';
     }
+
+    
     
 }

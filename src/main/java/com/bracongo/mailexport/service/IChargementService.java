@@ -18,5 +18,7 @@ public interface IChargementService {
     public List<ChargementProduitDto> getAllChargementGlobalByProduitByVoyageId(int voyageId);
     
     
-    public void produceChargementDataAndMail();
+  
+    
+    public void produceChargementResumeAndMail();
 }

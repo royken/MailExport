@@ -512,7 +512,9 @@ public class HhtFacture implements Serializable {
 
     @Override
     public String toString() {
-        return "com.bracongo.mailexport.data.HhtFacture[ hhtFacturePK=" + hhtFacturePK + " ]";
+        return "HhtFacture{" + "hhtFacturePK=" + hhtFacturePK + ", dateFact=" + dateFact + ", codeRoute=" + codeRoute + ", codeTour=" + codeTour + ", codeClt=" + codeClt + ", espece=" + espece + ", cheque=" + cheque + ", cb=" + cb + ", ristourneCumule=" + ristourneCumule + ", credit=" + credit + ", totalLiquide=" + totalLiquide + ", totalTva=" + totalTva + ", totalEmb=" + totalEmb + ", totalRistourneEncour=" + totalRistourneEncour + ", totalPointsFid=" + totalPointsFid + ", codeHit=" + codeHit + ", taxePrelevement=" + taxePrelevement + ", taxeTimbreFisc=" + taxeTimbreFisc + ", fraisLivraison=" + fraisLivraison + ", totalNetAPayer=" + totalNetAPayer + ", annule=" + annule + ", acompte=" + acompte + ", tauxPrelevement=" + tauxPrelevement + ", dateDebut=" + dateDebut + ", dateFin=" + dateFin + ", numeroSociete=" + numeroSociete + ", totalRemises=" + totalRemises + ", codeLivraison=" + codeLivraison + ", duAjoute=" + duAjoute + ", dateTour=" + dateTour + ", scanClient=" + scanClient + ", bl=" + bl + ", codeVendeur=" + codeVendeur + ", scanClientFin=" + scanClientFin + ", dateAnn=" + dateAnn + ", signature=" + signature + ", codeChineur=" + codeChineur + ", affecteLivreur=" + affecteLivreur + ", livrer=" + livrer + '}';
     }
+
+   
     
 }
